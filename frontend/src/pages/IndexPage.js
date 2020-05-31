@@ -4,6 +4,7 @@ import Container from "reactstrap/es/Container";
 import Col from "reactstrap/es/Col";
 import Row from "reactstrap/es/Row";
 import socketIOClient from "socket.io-client";
+import ChatLog from "../components/ChatLog";
 const ENDPOINT = "http://localhost:3001";
 //Voices to load into the browser
 let availableVoices = window.speechSynthesis.getVoices();
@@ -39,7 +40,7 @@ function IndexPage() {
       </Row>
       <Row>
         <Col>
-          <h1>hiii</h1>
+          <ChatLog chatArr={chatArr}/>
         </Col>
       </Row>
       <Row>

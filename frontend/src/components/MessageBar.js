@@ -2,12 +2,8 @@ import React, {useState} from 'react';
 import {
   InputGroup,
   InputGroupAddon,
-  InputGroupButtonDropdown,
   Input,
   Button,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem
 } from 'reactstrap';
 
 function MessageBar(props) {
@@ -28,7 +24,11 @@ function MessageBar(props) {
   const sendMessage = (e) => {
     console.log(lang);
     console.log(message);
-    socket.emit('newMessage',{lang,message})
+    if(message === ''){
+      return;
+    }
+    socket.emit('newMessage',{lang,message});
+    setMessage('');
   }
 
   return (
