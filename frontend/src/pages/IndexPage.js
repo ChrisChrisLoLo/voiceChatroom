@@ -4,10 +4,13 @@ import Container from "reactstrap/es/Container";
 import Col from "reactstrap/es/Col";
 import Row from "reactstrap/es/Row";
 import socketIOClient from "socket.io-client";
+import ss from "socket.io-stream";
 import ChatLog from "../components/ChatLog";
+import {withWaveHeader} from "../lib/wave-header";
 const ENDPOINT = "http://localhost:3001";
 //Voices to load into the browser
 let availableVoices = window.speechSynthesis.getVoices();
+let audioContext = new AudioContext();
 
 function IndexPage() {
   const [username, setUsername] = useState( );
@@ -15,10 +18,45 @@ function IndexPage() {
   let socket = socketIOClient(ENDPOINT);
 
   useEffect(() => {
-    socket.on('newMessage', msg => {
+    socket.on('newMessage', data => {
       console.log("new message");
-      readMessage(msg)
-      setChatArr(chatArr=>chatArr.concat(msg));
+      console.log(data);
+      readMessage(data.msg)
+      setChatArr(chatArr=>chatArr.concat(data.msg));
+    });
+
+    ss(socket).on('track-stream', async (stream) => {
+      console.log('SDFFSD')
+      console.log(stream)
+      let binaryString = ""
+      let byteArr = []
+      let realByteArr = null;
+      stream.on('data', function(data) {
+        for(var i=0;i<data.length;i++) {
+          binaryString+=(String.fromCharCode(data[i]));
+          byteArr.push(data[i]);
+        }
+      });
+      stream.on('end', function(data) {
+        console.log(binaryString);
+        console.log(byteArr);
+        // realByteArr = new Uint8Array(byteArr.length);
+        var myAudioBuffer = audioContext.createBuffer(1, byteArr.length, 8000);
+        var nowBuffering = myAudioBuffer.getChannelData(0);
+        for (var i = 0; i < byteArr.length; i++) {
+          nowBuffering[i] = byteArr[i];
+        }
+
+        var source = audioContext.createBufferSource();
+        source.buffer = myAudioBuffer;
+        source.connect(audioContext.destination);
+        source.start();
+      });
+      // const audioBufferChunk = await audioContext.decodeAudioData(binaryString);
+      // const source = audioContext.createBufferSource();
+      // source.buffer = audioBufferChunk;
+      // source.connect(audioContext.destination);
+      // source.start();
     });
   }, []);
 

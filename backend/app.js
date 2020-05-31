@@ -1,6 +1,8 @@
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
+const ss = require("socket.io-stream");
+const {spawn} = require("child_process");
 
 const port = process.env.PORT || 3001;
 const index = require("./routes/index");
@@ -17,7 +19,11 @@ io.on("connection", (socket) => {
 
   socket.on("newMessage", (msg) => {
     console.log("new message");
-    io.emit("newMessage", msg);
+    const espeak  = spawn("espeak", [msg, "--stdout"]);
+    const stream = ss.createStream();
+    espeak.stdout.pipe(stream)
+    ss(socket).emit('track-stream', stream);
+    io.emit("newMessage", {msg:msg});
   });
 
   socket.on("disconnect", () => {
