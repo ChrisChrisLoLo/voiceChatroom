@@ -30,33 +30,23 @@ function IndexPage() {
       console.log(stream)
       let binaryString = ""
       let byteArr = []
-      let realByteArr = null;
       stream.on('data', function(data) {
         for(var i=0;i<data.length;i++) {
-          binaryString+=(String.fromCharCode(data[i]));
+          binaryString+=String.fromCharCode(data[i]);
           byteArr.push(data[i]);
         }
       });
-      stream.on('end', function(data) {
+      stream.on('end', async (data) => {
         console.log(binaryString);
         console.log(byteArr);
-        // realByteArr = new Uint8Array(byteArr.length);
-        var myAudioBuffer = audioContext.createBuffer(1, byteArr.length, 8000);
-        var nowBuffering = myAudioBuffer.getChannelData(0);
-        for (var i = 0; i < byteArr.length; i++) {
-          nowBuffering[i] = byteArr[i];
-        }
+        let uIntByteArr = new Uint8Array(byteArr)
 
-        var source = audioContext.createBufferSource();
-        source.buffer = myAudioBuffer;
+        const audioBufferChunk = await audioContext.decodeAudioData(uIntByteArr.buffer);
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBufferChunk;
         source.connect(audioContext.destination);
         source.start();
       });
-      // const audioBufferChunk = await audioContext.decodeAudioData(binaryString);
-      // const source = audioContext.createBufferSource();
-      // source.buffer = audioBufferChunk;
-      // source.connect(audioContext.destination);
-      // source.start();
     });
   }, []);
 
