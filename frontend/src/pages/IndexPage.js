@@ -6,7 +6,6 @@ import Row from "reactstrap/es/Row";
 import socketIOClient from "socket.io-client";
 import ss from "socket.io-stream";
 import ChatLog from "../components/ChatLog";
-import {withWaveHeader} from "../lib/wave-header";
 const ENDPOINT = "http://localhost:3001";
 //Voices to load into the browser
 let availableVoices = window.speechSynthesis.getVoices();
@@ -16,6 +15,7 @@ function IndexPage() {
   const [username, setUsername] = useState( );
   const [chatArr, setChatArr] = useState([]);
   let socket = socketIOClient(ENDPOINT);
+  let ttsSocket = socketIOClient(ENDPOINT+"/tts");
 
   useEffect(() => {
     socket.on('newMessage', data => {
