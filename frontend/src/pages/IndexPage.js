@@ -14,24 +14,26 @@ let audioContext = new AudioContext();
 function IndexPage() {
   const [username, setUsername] = useState( );
   const [chatArr, setChatArr] = useState([]);
-  let socket = socketIOClient(ENDPOINT);
-  let ttsSocket = socketIOClient(ENDPOINT+"/tts");
+  let textSocket = socketIOClient(ENDPOINT+"/textData");
+  textSocket.emit('newLanguage',{lang:'en-US',message:"FUn"})
+
+  let ttsSocket = socketIOClient(ENDPOINT);
 
   useEffect(() => {
-    socket.on('newMessage', data => {
+    textSocket.on('newMessage', data => {
       console.log("new message");
       console.log(data);
       readMessage(data.msg)
       setChatArr(chatArr=>chatArr.concat(data.msg));
     });
 
-    ss(socket).on('track-stream', async (stream) => {
+    ss(ttsSocket).on('track-stream', async (stream) => {
       console.log('SDFFSD')
       console.log(stream)
       let binaryString = ""
       let byteArr = []
       stream.on('data', function(data) {
-        for(var i=0;i<data.length;i++) {
+        for(let i=0;i<data.length;i++) {
           binaryString+=String.fromCharCode(data[i]);
           byteArr.push(data[i]);
         }
@@ -73,7 +75,7 @@ function IndexPage() {
       </Row>
       <Row>
         <Col>
-          <MessageBar socket={socket}/>
+          <MessageBar sockets={[textSocket,ttsSocket]}/>
         </Col>
       </Row>
     </Container>

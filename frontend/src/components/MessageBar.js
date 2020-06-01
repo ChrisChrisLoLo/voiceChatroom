@@ -7,7 +7,7 @@ import {
 } from 'reactstrap';
 
 function MessageBar(props) {
-  const socket = props.socket;
+  const sockets = props.sockets;
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [lang, setLang] = React.useState('en-US');
@@ -27,7 +27,11 @@ function MessageBar(props) {
     if(message === ''){
       return;
     }
-    socket.emit('newMessage',{lang,message});
+    for(let i=0;i<sockets.length;i++){
+      console.log(sockets)
+      sockets[i].emit('newMessage',{lang,message});
+      // io.of('/textData').emit('newMessage',{lang,message});
+    }
     setMessage('');
   }
 
