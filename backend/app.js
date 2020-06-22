@@ -20,12 +20,16 @@ io.on("connection", (socket) => {
   console.log("New client connected");
 
   socket.on("newMessage", (msgData) => {
-    console.log("new message "+msgData.message);
+    console.log("new message in tts: "+msgData.message);
     const espeak  = spawn("espeak", [msgData.message, "--stdout"]);
-    const stream = ss.createStream();
-    espeak.stdout.pipe(stream);
+
+    if( !socket.stream ){
+      const stream = ss.createStream();
+      socket.steam = stream;
+    }
+    espeak.stdout.pipe(socket);
     // io.emit("newMessage", {msg:msgData});
-    ss(socket).emit('track-stream', stream);
+    ss(socket).emit('track-stream', socket);
   });
   socket.on("disconnect", () => {
     console.log("Client disconnected");
@@ -37,7 +41,7 @@ textDataNsp.on("connection", (socket) => {
   console.log("New text client connected");
   socket.on("newMessage", (msgData) => {
     console.log("new message in /textData: "+msgData.message);
-    // textDataNsp.emit("newMessage", {msg:msgData});
+    textDataNsp.emit("newMessage", {msg:msgData});
   });
 
   socket.on("disconnect", () => {
